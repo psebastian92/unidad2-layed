@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Programas Robustos: Validación de Datos — Unidad 2 — LAyED</title>
+<style>
+  :root{
+    --bg:#1e1f24;
+    --bg-side:#141519;
+    --bg-card:#26272e;
+    --bg-code:#101116;
+    --txt:#e8e8ea;
+    --txt-dim:#a9abb3;
+    --accent:#f0a04b;        /* naranja institucional */
+    --accent-soft:#ffd166;   /* amarillo títulos (como las diapos) */
+    --line:#3a3b44;
+    --kw:#569cd6; --str:#ce9178; --num:#b5cea8; --com:#6a9955;
+    --cls:#4ec9b0; --met:#dcdcaa; --err:#f48771;
+    --ok:#7ec97e; --warn:#e8735a;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg); color:var(--txt);
+    font-family:'Trebuchet MS', 'Segoe UI', Arial, sans-serif;
+    line-height:1.65;
+  }
+  /* ---------- SIDEBAR ---------- */
+  #sidebar{
+    position:fixed; top:0; left:0; bottom:0; width:270px;
+    background:var(--bg-side); border-right:1px solid var(--line);
+    overflow-y:auto; padding:22px 0 40px; z-index:50;
+    transition:transform .25s ease;
+  }
+  #sidebar .brand{
+    padding:0 20px 16px; border-bottom:1px solid var(--line); margin-bottom:12px;
+  }
+  #sidebar .brand h1{font-size:1.02rem; color:var(--accent-soft); letter-spacing:.4px;}
+  #sidebar .brand p{font-size:.78rem; color:var(--txt-dim); margin-top:4px;}
+  #sidebar nav a{
+    display:flex; align-items:center; gap:10px;
+    padding:8px 20px; color:var(--txt-dim); text-decoration:none;
+    font-size:.88rem; border-left:3px solid transparent;
+  }
+  #sidebar nav a .n{
+    font-family:Consolas, monospace; font-size:.72rem; color:var(--accent);
+    min-width:24px; text-align:right;
+  }
+  #sidebar nav a:hover{background:#1c1d23; color:var(--txt);}
+  #sidebar nav a.active{
+    border-left-color:var(--accent); color:var(--accent-soft); background:#1c1d23;
+  }
+  #menuBtn{
+    display:none; position:fixed; top:14px; left:14px; z-index:60;
+    background:var(--accent); color:#181818; border:none; border-radius:8px;
+    width:42px; height:42px; font-size:1.3rem; cursor:pointer; font-weight:bold;
+  }
+  /* ---------- MAIN ---------- */
+  main{margin-left:270px; padding:44px 56px 90px; max-width:1000px;}
+  section{margin-bottom:0; padding-bottom:70px; scroll-margin-top:24px;}
+  section + section{
+    border-top:2px solid var(--line);
+    padding-top:56px;
+    position:relative;
+  }
+  section + section::before{
+    content:""; position:absolute; top:-2px; left:0;
+    width:90px; height:2px; background:var(--accent);
+  }
+  .eyebrow{
+    font-family:Consolas, monospace; font-size:.78rem; color:var(--accent);
+    letter-spacing:1.5px; text-transform:uppercase;
+  }
+  h2{
+    font-size:1.7rem; color:#fff; margin:4px 0 6px;
+    border-bottom:2px solid var(--accent); display:inline-block; padding-bottom:4px;
+  }
+  h3{color:var(--accent-soft); font-size:1.12rem; margin:28px 0 10px;}
+  p{margin-bottom:12px; color:var(--txt);}
+  em{color:var(--accent-soft); font-style:normal;}
+  .lead{color:var(--txt-dim); font-size:1.02rem; margin-bottom:18px;}
+  code.inline{
+    font-family:Consolas, monospace; background:var(--bg-code);
+    padding:2px 7px; border-radius:5px; font-size:.9em; color:var(--accent-soft);
+    border:1px solid var(--line);
+  }
+  /* ---------- CODE BLOCKS ---------- */
+  .codewrap{position:relative; margin:16px 0 22px;}
+  pre{
+    background:var(--bg-code); border:1px solid var(--line);
+    border-left:4px solid var(--accent);
+    border-radius:10px; padding:18px 20px; overflow-x:auto;
+    font-family:Consolas, 'Courier New', monospace; font-size:.88rem; line-height:1.55;
+    color:#d4d4d4;
+  }
+  pre .kw{color:var(--kw);} pre .str{color:var(--str);} pre .num{color:var(--num);}
+  pre .com{color:var(--com); font-style:italic;} pre .cls{color:var(--cls);}
+  pre .met{color:var(--met);} pre .err{color:var(--err);}
+  .copybtn{
+    position:absolute; top:10px; right:10px;
+    background:#2e2f38; color:var(--txt-dim); border:1px solid var(--line);
+    border-radius:6px; padding:4px 10px; font-size:.72rem; cursor:pointer;
+    font-family:Consolas, monospace;
+  }
+  .copybtn:hover{color:var(--accent-soft); border-color:var(--accent);}
+  .console{
+    background:#000; border:1px solid var(--line); border-radius:10px;
+    padding:14px 18px; font-family:Consolas, monospace; font-size:.85rem;
+    color:#cfcfcf; margin:0 0 22px; white-space:pre-wrap;
+  }
+  .console::before{content:"CONSOLA ▸"; display:block; color:#666; font-size:.68rem; letter-spacing:1px; margin-bottom:8px;}
+  .console .in{color:var(--ok);}
+  .console .rojo{color:var(--err);}
+  /* ---------- BOTONES ---------- */
+  .btnrow{display:flex; flex-wrap:wrap; gap:10px; margin:14px 0 8px;}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:9px 16px; border-radius:8px; text-decoration:none;
+    font-size:.85rem; font-weight:bold; border:1px solid transparent;
+    transition:transform .12s ease;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn.video{background:#c4302b; color:#fff;}
+  .btn.github{background:#22232a; color:var(--txt); border-color:var(--line);}
+  .btn.github:hover{border-color:var(--accent);}
+  /* ---------- CAJAS ---------- */
+  .box{
+    border-radius:10px; padding:16px 20px; margin:18px 0;
+    border:1px solid var(--line); background:var(--bg-card);
+  }
+  .box .t{font-weight:bold; display:block; margin-bottom:6px; letter-spacing:.3px;}
+  .box.think{border-left:5px solid var(--accent-soft);}
+  .box.think .t{color:var(--accent-soft);}
+  .box.warn{border-left:5px solid var(--warn);}
+  .box.warn .t{color:var(--warn);}
+  .box.tip{border-left:5px solid var(--ok);}
+  .box.tip .t{color:var(--ok);}
+  /* ---------- TABLAS ---------- */
+  table{
+    width:100%; border-collapse:collapse; margin:16px 0 22px;
+    font-size:.88rem; background:var(--bg-card); border-radius:10px; overflow:hidden;
+  }
+  th{
+    background:#2e2f38; color:var(--accent-soft); text-align:left;
+    padding:10px 14px; font-size:.8rem; letter-spacing:.6px; text-transform:uppercase;
+  }
+  td{padding:9px 14px; border-top:1px solid var(--line); vertical-align:top;}
+  td code, td .mono{font-family:Consolas, monospace; color:var(--accent-soft);}
+  /* ---------- DOS COLUMNAS ---------- */
+  .cols{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:16px 0;}
+  .cols .col{
+    background:var(--bg-card); border:1px solid var(--line);
+    border-radius:10px; padding:16px 18px;
+  }
+  .cols .col h4{color:var(--accent); margin-bottom:8px; font-size:.95rem;}
+  /* ---------- SVG FIG ---------- */
+  figure{margin:22px 0; text-align:center;}
+  figure svg{max-width:100%; height:auto;}
+  figcaption{font-size:.8rem; color:var(--txt-dim); margin-top:8px;}
+  /* ---------- DETALLES COLAPSABLES ---------- */
+  details{
+    background:var(--bg-card); border:1px solid var(--line);
+    border-radius:10px; margin:14px 0; overflow:hidden;
+  }
+  details summary{
+    cursor:pointer; padding:12px 18px; font-weight:bold; color:var(--accent-soft);
+    list-style:none; user-select:none;
+  }
+  details summary::before{content:"▸ "; color:var(--accent);}
+  details[open] summary::before{content:"▾ ";}
+  details .inner{padding:0 18px 16px;}
+  /* ---------- VIDEOS EMBEBIDOS ---------- */
+  .videogrid{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px; margin:14px 0 6px;}
+  .videowrap{position:relative; padding-bottom:56.25%; height:0; border-radius:10px; overflow:hidden;
+    border:1px solid var(--line); background:#000;}
+  .videowrap iframe{position:absolute; top:0; left:0; width:100%; height:100%; border:0;}
+  .videowrap figcaption, .vcap{font-size:.8rem; color:var(--txt-dim); margin-top:6px; text-align:center;}
+  /* ---------- FOOTER ---------- */
+  footer{
+    margin-left:270px; padding:26px 56px; border-top:1px solid var(--line);
+    color:var(--txt-dim); font-size:.8rem; text-align:center;
+  }
+  @media(max-width:920px){
+    #sidebar{transform:translateX(-100%);}
+    #sidebar.open{transform:translateX(0);}
+    #menuBtn{display:block;}
+    main, footer{margin-left:0; padding:70px 22px 70px;}
+    .cols{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<button id="menuBtn" aria-label="Abrir menú">☰</button>
+
+<aside id="sidebar">
+  <div class="brand">
+    <h1>Programas Robustos: Validación de Datos</h1>
+    <p>Unidad 2 · LAyED · 4° TC<br>Prof. Sebastián</p>
+  </div>
+  <nav>
+    <a href="#inicio" class="active"><span class="n">00</span> Inicio</a>
+    <a href="#dolor"><span class="n">01</span> El programa ingenuo</a>
+    <a href="#patron"><span class="n">02</span> El patrón de validación</a>
+    <a href="#textos"><span class="n">03</span> Validar textos</a>
+    <a href="#rangos"><span class="n">04</span> Validar rangos numéricos</a>
+    <a href="#menus"><span class="n">05</span> Menús a prueba de balas</a>
+    <a href="#caja"><span class="n">06</span> La caja que no podemos cerrar</a>
+  </nav>
+</aside>
+
+<main>
+
+<!-- ============ 00 INICIO ============ -->
+<section id="inicio">
+  <span class="eyebrow">Unidad 2 · Material de ayuda</span>
+  <h2>Programas Robustos: Validación de Datos</h2>
+  <p class="lead">En la Unidad 1 aprendiste a escribir programas que funcionan… <em>cuando el usuario se porta bien</em>. En esta unidad aprendemos a escribir programas que sobreviven al mundo real: usuarios que dejan campos vacíos, que ingresan edades negativas, que eligen la opción 7 en un menú de 4.</p>
+
+  <div class="box tip">
+    <span class="t">¿Qué es un programa robusto?</span>
+    Un programa que <em>no confía</em> en los datos que recibe: los revisa antes de usarlos, y si están mal, avisa y vuelve a pedirlos. Todos los sistemas serios funcionan así: probá dejar tu usuario vacío en Instagram, o ponerle fecha de nacimiento año 3050 a un formulario. No te dejan. Eso es validación.
+  </div>
+
+  <div class="box think">
+    <span class="t">🧠 La nueva pregunta que se suma a las de siempre</span>
+    Ya conocés las tres de la U1: ¿qué datos necesito? ¿qué quiero mostrar? ¿qué pasos hay en el medio? Esta unidad agrega la cuarta, la del programador desconfiado: <em>¿qué puede venir mal en cada dato?</em>
+  </div>
+
+  <p>Herramientas nuevas de esta unidad: cero. Todo se construye con lo que ya sabés de la U1: <code class="inline">while</code>, <code class="inline">do-while</code>, operadores lógicos y Scanner. Lo nuevo es <em>cómo pensás</em> el programa.</p>
+</section>
+
+<!-- ============ 01 EL DOLOR ============ -->
+<section id="dolor">
+  <span class="eyebrow">Tema 01</span>
+  <h2>El programa ingenuo</h2>
+  <p class="lead">Este programa es 100% correcto según la Unidad 1: compila, ejecuta, muestra los datos. Copialo en Eclipse y probalo… pero probalo <em>como usuario malicioso</em>.</p>
+
+  <div class="codewrap"><button class="copybtn">Copiar</button><pre><span class="kw">import</span> java.util.<span class="cls">Scanner</span>;
+
+<span class="kw">public class</span> <span class="cls">RegistroIngenuo</span> {
+    <span class="kw">public static void</span> <span class="met">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">Scanner</span> entrada = <span class="kw">new</span> <span class="cls">Scanner</span>(<span class="cls">System</span>.in);
+
+        <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"Ingrese su nombre: "</span>);
+        <span class="cls">String</span> nombre = entrada.<span class="met">nextLine</span>();
+
+        <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"Ingrese su edad: "</span>);
+        <span class="kw">int</span> edad = entrada.<span class="met">nextInt</span>();
+
+        <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"\n--- Datos registrados correctamente ---"</span>);
+        <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"Nombre: "</span> + nombre);
+        <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"Edad: "</span> + edad);
+    }
+}</pre></div>
+
+  <div class="box warn">
+    <span class="t">🔨 Desafío: rompelo</span>
+    Ejecutalo tres veces y probá:<br>
+    ① Apretá Enter sin escribir nada en el nombre.<br>
+    ② Ingresá edad <code class="inline">-5</code>.<br>
+    ③ Ingresá edad <code class="inline">900</code>.<br>
+    ¿Qué hace el programa en cada caso?
+  </div>
+
+  <p>Spoiler de lo que vas a ver:</p>
+
+  <div class="console"><span class="in">Ingrese su nombre:</span> 
+<span class="in">Ingrese su edad:</span> -5
+
+--- Datos registrados correctamente ---
+Nombre: 
+Edad: -5</div>
+
+  <p>El programa registró "correctamente" a una persona <em>sin nombre y con edad negativa</em>. No tiró error, no se quejó, no explotó: hizo algo peor. <em>Aceptó basura y la trató como si fuera un dato válido.</em> Imaginate esto en el sistema de un hospital, de un banco o del SIU de una facultad.</p>
+
+  <div class="box think">
+    <span class="t">🧠 El problema no es el usuario</span>
+    El usuario puede equivocarse, apurarse o directamente querer romper el sistema. Eso no lo controlás. Lo que sí controlás es tu programa: <em>la responsabilidad de rechazar datos inválidos es siempre del código, nunca del usuario.</em> Grabate esa frase, porque en Java Web va a valer oro.
+  </div>
+</section>
+
+<!-- ============ 02 EL PATRÓN ============ -->
+<section id="patron">
+  <span class="eyebrow">Tema 02</span>
+  <h2>El patrón de validación</h2>
+  <p class="lead">La solución tiene forma de receta, y la vas a usar mil veces: <em>pedir el dato, y mientras esté mal, avisar y volver a pedirlo</em>. ¿Qué estructura de la U1 repite algo mientras se cumple una condición? Exacto: el <code class="inline">while</code>.</p>
+
+  <figure>
+    <svg viewBox="0 0 680 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama del patrón de validación">
+      <defs><marker id="arrv" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#e8735a"/></marker></defs>
+      <!-- 1. pedir -->
+      <rect x="230" y="14" width="200" height="42" rx="10" fill="#26272e" stroke="#7ec97e" stroke-width="2"/>
+      <text x="330" y="40" fill="#e8e8ea" font-size="13" text-anchor="middle" font-family="Consolas">1. PEDIR el dato</text>
+      <line x1="330" y1="58" x2="330" y2="82" stroke="#e8735a" stroke-width="2.5" marker-end="url(#arrv)"/>
+      <!-- 2. decisión -->
+      <path d="M330,88 L460,148 L330,208 L200,148 Z" fill="#26272e" stroke="#569cd6" stroke-width="2"/>
+      <text x="330" y="143" fill="#e8e8ea" font-size="13" text-anchor="middle" font-family="Consolas">2. ¿El dato</text>
+      <text x="330" y="163" fill="#e8e8ea" font-size="13" text-anchor="middle" font-family="Consolas">está MAL?</text>
+      <!-- SÍ: hacia el bloque de error -->
+      <text x="475" y="138" fill="#e8735a" font-size="13" font-family="Consolas" font-weight="bold">SÍ</text>
+      <line x1="462" y1="148" x2="498" y2="148" stroke="#e8735a" stroke-width="2.5" marker-end="url(#arrv)"/>
+      <rect x="503" y="118" width="164" height="60" rx="10" fill="#26272e" stroke="#f48771" stroke-width="2"/>
+      <text x="585" y="143" fill="#f48771" font-size="12" text-anchor="middle" font-family="Consolas">3. AVISAR el error</text>
+      <text x="585" y="163" fill="#f48771" font-size="12" text-anchor="middle" font-family="Consolas">4. VOLVER a pedir</text>
+      <!-- lazo de regreso: del bloque de error hacia arriba y a la re-pregunta -->
+      <path d="M585,116 L585,70 L344,70" fill="none" stroke="#e8735a" stroke-width="2.5" marker-end="url(#arrv)"/>
+      <text x="470" y="62" fill="#a9abb3" font-size="11" text-anchor="middle" font-family="Trebuchet MS">se vuelve a analizar el dato nuevo</text>
+      <!-- NO: hacia usar el dato -->
+      <text x="345" y="238" fill="#7ec97e" font-size="13" font-family="Consolas" font-weight="bold">NO</text>
+      <line x1="330" y1="210" x2="330" y2="252" stroke="#e8735a" stroke-width="2.5" marker-end="url(#arrv)"/>
+      <rect x="240" y="258" width="180" height="42" rx="21" fill="#26272e" stroke="#7ec97e" stroke-width="2"/>
+      <text x="330" y="284" fill="#7ec97e" font-size="13" text-anchor="middle" font-family="Consolas">USAR el dato ✔</text>
+      <text x="340" y="350" fill="#a9abb3" font-size="12" text-anchor="middle" font-family="Trebuchet MS">El bucle solo se abandona cuando el dato es válido. No hay forma de "colar" basura.</text>
+    </svg>
+  </figure>
+
+  <h3>El esqueleto en Java</h3>
+  <div class="codewrap"><button class="copybtn">Copiar</button><pre><span class="com">// 1. PEDIR el dato (una primera vez, ANTES del while)</span>
+dato = entrada.<span class="met">next...</span>();
+
+<span class="com">// 2. MIENTRAS el dato esté MAL...</span>
+<span class="kw">while</span> (condición que describe el dato INVÁLIDO) {
+    <span class="com">// 3. AVISAR qué está mal (con System.err, en rojo)</span>
+    <span class="cls">System</span>.err.<span class="met">println</span>(<span class="str">"Error: ..."</span>);
+    <span class="com">// 4. VOLVER a pedir</span>
+    dato = entrada.<span class="met">next...</span>();
+}
+<span class="com">// Acá abajo, el dato es válido SÍ o SÍ</span></pre></div>
+
+  <div class="box warn">
+    <span class="t">⚠️ El detalle que confunde a todos: la condición se escribe AL REVÉS</span>
+    La condición del while describe el dato <em>inválido</em>, no el válido. Si la edad válida es de 0 a 130, el while dice <code class="inline">edad &lt; 0 || edad &gt; 130</code> — o sea, "mientras esté <em>fuera</em> del rango, seguí pidiendo". Es el mismo razonamiento del for decreciente de la U1: pensá qué condición mantiene <em>vivo</em> el bucle.
+  </div>
+
+  <div class="box think">
+    <span class="t">🧠 ¿Por qué se pide el dato DOS veces en el código?</span>
+    Una vez antes del while (si no, la variable estaría vacía y el while no tendría qué analizar) y otra adentro (si no, el bucle repetiría el cartel de error infinitamente sin dejar corregir). Sacá mentalmente cada una y pensá qué pasaría. Esto cae en el examen escrito, seguro. 😏
+  </div>
+</section>
+
+<!-- ============ 03 VALIDAR TEXTOS ============ -->
+<section id="textos">
+  <span class="eyebrow">Tema 03</span>
+  <h2>Validar textos</h2>
+  <p class="lead">El error más común con un texto: que venga vacío (el usuario apretó Enter de una) o lleno de espacios. Java tiene un detector exacto para eso: <code class="inline">isBlank()</code>.</p>
+
+  <div class="codewrap"><button class="copybtn">Copiar</button><pre><span class="com">// --- Bloque para el nombre ---</span>
+<span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"Ingrese su nombre: "</span>);
+<span class="cls">String</span> nombre = entrada.<span class="met">nextLine</span>();
+
+<span class="com">// Validación: mientras el nombre esté vacío o solo tenga espacios, repite la petición</span>
+<span class="kw">while</span> (nombre.<span class="met">isBlank</span>()) {
+    <span class="cls">System</span>.err.<span class="met">println</span>(<span class="str">"Error: El nombre no puede quedar vacío. Inténtelo de nuevo:"</span>);
+    nombre = entrada.<span class="met">nextLine</span>();
+}</pre></div>
+
+  <div class="console"><span class="in">Ingrese su nombre:</span> 
+<span class="rojo">Error: El nombre no puede quedar vacío. Inténtelo de nuevo:</span>
+<span class="in"></span>    
+<span class="rojo">Error: El nombre no puede quedar vacío. Inténtelo de nuevo:</span>
+<span class="in"></span>Zoe</div>
+
+  <p>Fijate el patrón completo en acción: pedir → while con la condición de lo inválido → avisar en rojo → volver a pedir. El usuario puede insistir con Enter veinte veces: el programa no avanza hasta tener un nombre de verdad.</p>
+
+  <div class="box warn">
+    <span class="t">⚠️ Acá aparece nextLine(), que no es next()</span>
+    En la U1 usábamos <code class="inline">next()</code>, que lee <em>una palabra</em> y nunca devuelve vacío (se queda esperando). Para validar vacíos necesitamos <code class="inline">nextLine()</code>, que lee <em>la línea entera</em>, espacios incluidos — y por eso puede venir en blanco. Ojo con mezclarlos: si usás <code class="inline">nextLine()</code> <em>después</em> de un <code class="inline">nextInt()</code>, se traga el Enter que quedó flotando y parece que "saltea" el ingreso. Regla práctica de esta unidad: pedí los textos primero, los números después — como en el ejemplo completo del Tema 04.
+  </div>
+
+  <h3>Validar opciones de texto: equalsIgnoreCase()</h3>
+  <p>Otro caso típico: una respuesta que solo puede ser "si" o "no". Para comparar Strings <em>nunca</em> se usa <code class="inline">==</code> (eso compara otra cosa que vas a entender en POO); se usa <code class="inline">equals()</code>, o mejor, <code class="inline">equalsIgnoreCase()</code>, que ignora mayúsculas y minúsculas:</p>
+
+  <div class="codewrap"><button class="copybtn">Copiar</button><pre><span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"¿Confirma la inscripción? (si/no)"</span>);
+<span class="cls">String</span> respuesta = entrada.<span class="met">nextLine</span>();
+
+<span class="com">// Mientras NO sea "si" NI "no" (en cualquier combinación de mayúsculas)...</span>
+<span class="kw">while</span> (!respuesta.<span class="met">equalsIgnoreCase</span>(<span class="str">"si"</span>) &amp;&amp; !respuesta.<span class="met">equalsIgnoreCase</span>(<span class="str">"no"</span>)) {
+    <span class="cls">System</span>.err.<span class="met">println</span>(<span class="str">"Error: responda 'si' o 'no'."</span>);
+    respuesta = entrada.<span class="met">nextLine</span>();
+}
+
+<span class="kw">if</span> (respuesta.<span class="met">equalsIgnoreCase</span>(<span class="str">"si"</span>)) {
+    <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"Inscripción confirmada."</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"Inscripción cancelada."</span>);
+}</pre></div>
+
+  <div class="box think">
+    <span class="t">🧠 Leé la condición en voz alta</span>
+    <code class="inline">!respuesta.equalsIgnoreCase("si") &amp;&amp; !respuesta.equalsIgnoreCase("no")</code> se lee: "mientras la respuesta NO sea 'si' Y TAMPOCO sea 'no'". Los dos <code class="inline">!</code> y el <code class="inline">&amp;&amp;</code> trabajando juntos: repaso directo del Tema 06 de la U1.
+  </div>
+</section>
+
+<!-- ============ 04 RANGOS ============ -->
+<section id="rangos">
+  <span class="eyebrow">Tema 04</span>
+  <h2>Validar rangos numéricos</h2>
+  <p class="lead">Con los números, el enemigo no es el vacío: son los valores <em>absurdos</em>. Edades negativas, notas de 47 puntos, precios de -100 pesos. La herramienta: el while con operadores de comparación.</p>
+
+  <h3>El programa completo: registro con validación</h3>
+  <p>Este es el programa ingenuo del Tema 01, pero ya curado. Compará los dos, línea por línea:</p>
+
+  <div class="codewrap"><button class="copybtn">Copiar</button><pre><span class="kw">import</span> java.util.<span class="cls">Scanner</span>;
+
+<span class="kw">public class</span> <span class="cls">Validaciones</span> {
+    <span class="kw">public static void</span> <span class="met">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">Scanner</span> entrada = <span class="kw">new</span> <span class="cls">Scanner</span>(<span class="cls">System</span>.in);
+
+        <span class="com">/* SISTEMA DE INGRESO DE EDADES CON VALIDACIÓN */</span>
+
+        <span class="com">// --- Bloque para el nombre ---</span>
+        <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"Ingrese su nombre: "</span>);
+        <span class="cls">String</span> nombre = entrada.<span class="met">nextLine</span>();
+
+        <span class="kw">while</span> (nombre.<span class="met">isBlank</span>()) {
+            <span class="cls">System</span>.err.<span class="met">println</span>(<span class="str">"Error: El nombre no puede quedar vacío. Inténtelo de nuevo:"</span>);
+            nombre = entrada.<span class="met">nextLine</span>();
+        }
+
+        <span class="com">// --- Bloque para la edad ---</span>
+        <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"Ingrese su edad: "</span>);
+        <span class="kw">int</span> edad = entrada.<span class="met">nextInt</span>();
+
+        <span class="com">// Validación de rango: la edad debe ser coherente (entre 0 y 130 años)</span>
+        <span class="kw">while</span> (edad &lt; <span class="num">0</span> || edad &gt; <span class="num">130</span>) {
+            <span class="cls">System</span>.err.<span class="met">println</span>(<span class="str">"Error: Edad no válida. Ingrese un valor entre 0 y 130:"</span>);
+            edad = entrada.<span class="met">nextInt</span>();
+        }
+
+        <span class="com">// --- Salida de datos finales ---</span>
+        <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"\n--- Datos registrados correctamente ---"</span>);
+        <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"Nombre: "</span> + nombre);
+        <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"Edad: "</span> + edad);
+    }
+}</pre></div>
+
+  <div class="console"><span class="in">Ingrese su nombre:</span> Thiago
+<span class="in">Ingrese su edad:</span> -5
+<span class="rojo">Error: Edad no válida. Ingrese un valor entre 0 y 130:</span>
+<span class="in"></span>900
+<span class="rojo">Error: Edad no válida. Ingrese un valor entre 0 y 130:</span>
+<span class="in"></span>17
+
+--- Datos registrados correctamente ---
+Nombre: Thiago
+Edad: 17</div>
+
+  <p>Ahora sí: el "correctamente" del mensaje final es verdad. Ningún dato llegó ahí sin pasar la aduana.</p>
+
+  <h3>La receta para escribir la condición del rango</h3>
+  <p>Pensá primero lo <em>válido</em>, después invertilo para el while:</p>
+  <table>
+    <tr><th>Dato</th><th>Lo válido</th><th>La condición del while (lo inválido)</th></tr>
+    <tr><td>Edad</td><td>de 0 a 130</td><td><code>edad &lt; 0 || edad &gt; 130</code></td></tr>
+    <tr><td>Nota</td><td>de 1 a 10</td><td><code>nota &lt; 1 || nota &gt; 10</code></td></tr>
+    <tr><td>Opción de menú</td><td>de 1 a 4</td><td><code>opcion &lt; 1 || opcion &gt; 4</code></td></tr>
+    <tr><td>Precio</td><td>mayor a 0</td><td><code>precio &lt;= 0</code></td></tr>
+    <tr><td>Día del mes</td><td>de 1 a 30</td><td><code>dia &lt; 1 || dia &gt; 30</code></td></tr>
+  </table>
+
+  <div class="box warn">
+    <span class="t">⚠️ El error clásico: usar &amp;&amp; donde va ||</span>
+    <code class="inline">edad &lt; 0 &amp;&amp; edad &gt; 130</code> pregunta si la edad es menor que 0 <em>y al mismo tiempo</em> mayor que 130. Ningún número puede ser las dos cosas a la vez, así que esa condición es <em>siempre falsa</em> y el while nunca valida nada. Un dato está fuera del rango si se escapa por abajo <em>O</em> por arriba: siempre <code class="inline">||</code>.
+  </div>
+
+  <div class="btnrow">
+    <a class="btn github" href="https://github.com/psebastian92/validacionesSimples" target="_blank">⌥ Código completo en GitHub</a>
+  </div>
+</section>
+
+<!-- ============ 05 MENÚS ============ -->
+<section id="menus">
+  <span class="eyebrow">Tema 05</span>
+  <h2>Menús a prueba de balas</h2>
+  <p class="lead">El menú de opciones es EL lugar donde la validación se vuelve indispensable, porque un menú roto rompe todo el programa. Y acá el <code class="inline">do-while</code> de la U1 encuentra su trabajo soñado: mostrar el menú <em>al menos una vez</em>, y repetirlo mientras la opción sea inválida.</p>
+
+  <div class="codewrap"><button class="copybtn">Copiar</button><pre><span class="kw">int</span> opcion;
+
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"\n===== KIOSCO DEL COLE ====="</span>);
+    <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"1. Ver productos"</span>);
+    <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"2. Comprar"</span>);
+    <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"3. Ver mi saldo"</span>);
+    <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"4. Salir"</span>);
+    <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"Elija una opcion: "</span>);
+
+    opcion = entrada.<span class="met">nextInt</span>();
+
+    <span class="kw">if</span> (opcion &lt; <span class="num">1</span> || opcion &gt; <span class="num">4</span>) {
+        <span class="cls">System</span>.err.<span class="met">println</span>(<span class="str">"Error: la opcion "</span> + opcion + <span class="str">" no existe."</span>);
+    }
+
+} <span class="kw">while</span> (opcion &lt; <span class="num">1</span> || opcion &gt; <span class="num">4</span>);
+
+<span class="com">// Llegado acá, la opción es válida: la procesamos con switch (¡U1, Tema 08!)</span>
+<span class="kw">switch</span> (opcion) {
+    <span class="kw">case</span> <span class="num">1</span>: <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"Alfajores, gaseosas, chicles..."</span>); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">2</span>: <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"Elegiste comprar."</span>); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">3</span>: <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"Tu saldo es de $2500."</span>); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">4</span>: <span class="cls">System</span>.out.<span class="met">println</span>(<span class="str">"Hasta la proxima!"</span>); <span class="kw">break</span>;
+}</pre></div>
+
+  <div class="console">===== KIOSCO DEL COLE =====
+1. Ver productos
+2. Comprar
+3. Ver mi saldo
+4. Salir
+<span class="in">Elija una opcion:</span> 8
+<span class="rojo">Error: la opcion 8 no existe.</span>
+
+===== KIOSCO DEL COLE =====
+1. Ver productos
+2. Comprar
+3. Ver mi saldo
+4. Salir
+<span class="in">Elija una opcion:</span> 3
+Tu saldo es de $2500.</div>
+
+  <div class="box think">
+    <span class="t">🧠 ¿Por qué do-while acá y while en los otros temas?</span>
+    Porque el menú <em>tiene que mostrarse al menos una vez</em>, sí o sí — es exactamente la especialidad del do-while que viste en la U1. En cambio, para validar un dato ya pedido, el while común alcanza. Elegir el bucle correcto para cada situación: eso también es diseñar el programa antes de tipearlo.
+  </div>
+
+  <div class="box tip">
+    <span class="t">💡 Mirá todo lo que se juntó acá</span>
+    En este ejemplo trabajan juntos: do-while (U1-T09), operadores lógicos (U1-T06), Scanner (U1-T05), switch con break (U1-T08) y el patrón de validación (U2-T02). Los programas de verdad son esto: las piezas de siempre, bien combinadas. Este menú validado es el corazón de los sistemas que vas a armar en la Unidad 4 con listas.
+  </div>
+</section>
+
+<!-- ============ 06 LA CAJA ============ -->
+<section id="caja">
+  <span class="eyebrow">Tema 06</span>
+  <h2>La caja que no podemos cerrar (todavía)</h2>
+  <p class="lead">Seamos honestos: nuestro registro validado del Tema 04 sigue teniendo un punto débil. Probá esto: cuando te pida la edad, escribí <code class="inline">hola</code>.</p>
+
+  <div class="console"><span class="in">Ingrese su nombre:</span> Milagros
+<span class="in">Ingrese su edad:</span> hola
+<span class="rojo">Exception in thread "main" java.util.InputMismatchException
+	at java.base/java.util.Scanner.throwFor(Scanner.java:964)
+	at java.base/java.util.Scanner.next(Scanner.java:1619)
+	at java.base/java.util.Scanner.nextInt(Scanner.java:2284)
+	at validaciones.Validaciones.main(Validaciones.java:21)</span></div>
+
+  <p>💥 El programa <em>explotó</em>. Esa pantalla roja se llama <em>excepción</em> (acá, una <code class="inline">InputMismatchException</code>: "lo que ingresaste no coincide con lo que esperaba"). Y fijate el detalle cruel: explotó <em>antes</em> de llegar a nuestro while. Nuestra validación de rango nunca tuvo chance de actuar, porque el error ocurre en el momento mismo en que <code class="inline">nextInt()</code> intenta convertir "hola" en número.</p>
+
+  <div class="box warn">
+    <span class="t">⚠️ ¿Por qué el while no puede resolver esto?</span>
+    Porque el while compara <em>valores</em>: necesita que la edad ya sea un número para preguntarle si está entre 0 y 130. Pero "hola" no puede convertirse en número — el problema no es el valor del dato, es su <em>tipo</em>. Es una categoría de error completamente distinta, y las herramientas de esta unidad no la alcanzan.
+  </div>
+
+  <h3>El spoiler: try-catch</h3>
+  <p>Java tiene una herramienta específica para los errores que no se pueden prevenir comparando valores: se llama <code class="inline">try-catch</code>, y funciona como una red de seguridad — "intentá (<em>try</em>) esta operación riesgosa, y si explota, atrapala (<em>catch</em>) y decidí qué hacer, en lugar de morir con la pantalla roja".</p>
+
+  <p>La vamos a estudiar más adelante, justo antes de Java Web. ¿Por qué ahí? Porque en la web esto deja de ser un caso raro y pasa a ser el pan de cada día: <em>todo</em> lo que llega de una página web llega como texto y hay que convertirlo; la base de datos puede estar caída justo cuando tu programa la necesita; una ruta mal escrita hace fallar la conexión entre páginas. Son errores que no dependen de tu código sino del mundo exterior — y contra el mundo exterior, el <code class="inline">if</code> no alcanza.</p>
+
+  <table>
+    <tr><th>Tipo de problema</th><th>Herramienta</th><th>Cuándo</th></tr>
+    <tr><td>El <em>valor</em> del dato está mal (edad -5, nombre vacío, opción 8)</td><td><code>if</code> / <code>while</code> de validación</td><td>Desde YA — es esta unidad</td></tr>
+    <tr><td>La <em>operación</em> puede explotar (convertir "hola" a número, conectar con algo externo)</td><td><code>try-catch</code></td><td>Antes de Java Web</td></tr>
+  </table>
+
+  <div class="box think">
+    <span class="t">🧠 Para cerrar la unidad</span>
+    Volvé al programa ingenuo del Tema 01 y hacé la lista completa: ¿cuántas formas distintas encontraste de romperlo? ¿Cuáles curamos en esta unidad y cuál quedó pendiente? Un programador robusto no es el que nunca tiene errores: es el que sabe exactamente cuáles puede tener.
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Programas Robustos: Validación de Datos · Unidad 2 · Laboratorio de Algoritmos y Estructuras de Datos · 4° TC<br>
+  Instituto Técnico Nuestra Señora de Fátima (A-893) · Prof. Sebastián
+</footer>
+
+<script>
+// Menú móvil
+const menuBtn = document.getElementById('menuBtn');
+const sidebar = document.getElementById('sidebar');
+menuBtn.addEventListener('click', () => sidebar.classList.toggle('open'));
+document.querySelectorAll('#sidebar nav a').forEach(a => {
+  a.addEventListener('click', () => sidebar.classList.remove('open'));
+});
+
+// Resaltar sección activa en la sidebar
+const links = document.querySelectorAll('#sidebar nav a');
+const sections = document.querySelectorAll('main section');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id));
+    }
+  });
+}, {rootMargin: '-30% 0px -60% 0px'});
+sections.forEach(s => obs.observe(s));
+
+// Botones de copiar
+document.querySelectorAll('.copybtn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const pre = btn.parentElement.querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '¡Copiado!';
+      setTimeout(() => btn.textContent = 'Copiar', 1500);
+    });
+  });
+});
+</script>
+</body>
+</html>
