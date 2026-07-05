@@ -69,12 +69,12 @@
     width:90px; height:2px; background:var(--accent);
   }
   .eyebrow{
-    font-family:Consolas, monospace; font-size:.78rem; color:var(--accent);
-    letter-spacing:1.5px; text-transform:uppercase;
+    display:block; font-family:Consolas, monospace; font-size:.78rem; color:var(--accent);
+    letter-spacing:1.5px; text-transform:uppercase; margin-bottom:4px;
   }
   h2{
-    font-size:1.7rem; color:#fff; margin:4px 0 6px;
-    border-bottom:2px solid var(--accent); display:inline-block; padding-bottom:4px;
+    font-size:2.1rem; color:#fff; margin:0 0 16px; line-height:1.2;
+    border-bottom:3px solid var(--accent); display:inline-block; padding-bottom:6px;
   }
   h3{color:var(--accent-soft); font-size:1.12rem; margin:28px 0 10px;}
   p{margin-bottom:12px; color:var(--txt);}
@@ -197,7 +197,7 @@
 <aside id="sidebar">
   <div class="brand">
     <h1>Programas Robustos: Validación de Datos</h1>
-    <p>Unidad 2 · LAyED · 4° TC<br>Prof. Sebastián</p>
+    <p>Unidad 2 · LAyED · 4° TC<br>Prof. Sebastián Muñoz</p>
   </div>
   <nav>
     <a href="#inicio" class="active"><span class="n">00</span> Inicio</a>
@@ -291,28 +291,29 @@ Edad: -5</div>
     <svg viewBox="0 0 680 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama del patrón de validación">
       <defs><marker id="arrv" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#e8735a"/></marker></defs>
       <!-- 1. pedir -->
-      <rect x="230" y="14" width="200" height="42" rx="10" fill="#26272e" stroke="#7ec97e" stroke-width="2"/>
-      <text x="330" y="40" fill="#e8e8ea" font-size="13" text-anchor="middle" font-family="Consolas">1. PEDIR el dato</text>
-      <line x1="330" y1="58" x2="330" y2="82" stroke="#e8735a" stroke-width="2.5" marker-end="url(#arrv)"/>
+      <rect x="230" y="10" width="200" height="42" rx="10" fill="#26272e" stroke="#7ec97e" stroke-width="2"/>
+      <text x="330" y="36" fill="#e8e8ea" font-size="13" text-anchor="middle" font-family="Consolas">1. PEDIR el dato</text>
+      <line x1="330" y1="54" x2="330" y2="98" stroke="#e8735a" stroke-width="2.5" marker-end="url(#arrv)"/>
+      <!-- lazo de regreso: se une al flujo principal en un punto de unión -->
+      <path d="M585,132 L585,76 L330,76" fill="none" stroke="#e8735a" stroke-width="2.5"/>
+      <circle cx="330" cy="76" r="4.5" fill="#e8735a"/>
+      <text x="462" y="68" fill="#a9abb3" font-size="11" text-anchor="middle" font-family="Trebuchet MS">se vuelve a analizar el dato nuevo</text>
       <!-- 2. decisión -->
-      <path d="M330,88 L460,148 L330,208 L200,148 Z" fill="#26272e" stroke="#569cd6" stroke-width="2"/>
-      <text x="330" y="143" fill="#e8e8ea" font-size="13" text-anchor="middle" font-family="Consolas">2. ¿El dato</text>
-      <text x="330" y="163" fill="#e8e8ea" font-size="13" text-anchor="middle" font-family="Consolas">está MAL?</text>
+      <path d="M330,104 L460,164 L330,224 L200,164 Z" fill="#26272e" stroke="#569cd6" stroke-width="2"/>
+      <text x="330" y="159" fill="#e8e8ea" font-size="13" text-anchor="middle" font-family="Consolas">2. ¿El dato</text>
+      <text x="330" y="179" fill="#e8e8ea" font-size="13" text-anchor="middle" font-family="Consolas">está MAL?</text>
       <!-- SÍ: hacia el bloque de error -->
-      <text x="475" y="138" fill="#e8735a" font-size="13" font-family="Consolas" font-weight="bold">SÍ</text>
-      <line x1="462" y1="148" x2="498" y2="148" stroke="#e8735a" stroke-width="2.5" marker-end="url(#arrv)"/>
-      <rect x="503" y="118" width="164" height="60" rx="10" fill="#26272e" stroke="#f48771" stroke-width="2"/>
-      <text x="585" y="143" fill="#f48771" font-size="12" text-anchor="middle" font-family="Consolas">3. AVISAR el error</text>
-      <text x="585" y="163" fill="#f48771" font-size="12" text-anchor="middle" font-family="Consolas">4. VOLVER a pedir</text>
-      <!-- lazo de regreso: del bloque de error hacia arriba y a la re-pregunta -->
-      <path d="M585,116 L585,70 L344,70" fill="none" stroke="#e8735a" stroke-width="2.5" marker-end="url(#arrv)"/>
-      <text x="470" y="62" fill="#a9abb3" font-size="11" text-anchor="middle" font-family="Trebuchet MS">se vuelve a analizar el dato nuevo</text>
+      <text x="472" y="154" fill="#e8735a" font-size="13" font-family="Consolas" font-weight="bold">SÍ</text>
+      <line x1="462" y1="164" x2="498" y2="164" stroke="#e8735a" stroke-width="2.5" marker-end="url(#arrv)"/>
+      <rect x="503" y="134" width="164" height="60" rx="10" fill="#26272e" stroke="#f48771" stroke-width="2"/>
+      <text x="585" y="159" fill="#f48771" font-size="12" text-anchor="middle" font-family="Consolas">3. AVISAR el error</text>
+      <text x="585" y="179" fill="#f48771" font-size="12" text-anchor="middle" font-family="Consolas">4. VOLVER a pedir</text>
       <!-- NO: hacia usar el dato -->
-      <text x="345" y="238" fill="#7ec97e" font-size="13" font-family="Consolas" font-weight="bold">NO</text>
-      <line x1="330" y1="210" x2="330" y2="252" stroke="#e8735a" stroke-width="2.5" marker-end="url(#arrv)"/>
-      <rect x="240" y="258" width="180" height="42" rx="21" fill="#26272e" stroke="#7ec97e" stroke-width="2"/>
-      <text x="330" y="284" fill="#7ec97e" font-size="13" text-anchor="middle" font-family="Consolas">USAR el dato ✔</text>
-      <text x="340" y="350" fill="#a9abb3" font-size="12" text-anchor="middle" font-family="Trebuchet MS">El bucle solo se abandona cuando el dato es válido. No hay forma de "colar" basura.</text>
+      <text x="345" y="250" fill="#7ec97e" font-size="13" font-family="Consolas" font-weight="bold">NO</text>
+      <line x1="330" y1="226" x2="330" y2="266" stroke="#e8735a" stroke-width="2.5" marker-end="url(#arrv)"/>
+      <rect x="240" y="272" width="180" height="42" rx="21" fill="#26272e" stroke="#7ec97e" stroke-width="2"/>
+      <text x="330" y="298" fill="#7ec97e" font-size="13" text-anchor="middle" font-family="Consolas">USAR el dato ✔</text>
+      <text x="340" y="368" fill="#a9abb3" font-size="12" text-anchor="middle" font-family="Trebuchet MS">El bucle solo se abandona cuando el dato es válido. No hay forma de "colar" basura.</text>
     </svg>
   </figure>
 
@@ -571,7 +572,7 @@ Tu saldo es de $2500.</div>
 
 <footer>
   Programas Robustos: Validación de Datos · Unidad 2 · Laboratorio de Algoritmos y Estructuras de Datos · 4° TC<br>
-  Instituto Técnico Nuestra Señora de Fátima (A-893) · Prof. Sebastián
+  Instituto Técnico Nuestra Señora de Fátima (A-893) · Prof. Sebastián Muñoz
 </footer>
 
 <script>
